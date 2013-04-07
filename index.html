@@ -35,17 +35,18 @@ body {
 			scene = new THREE.Scene();
 
 			var radius = 300;
-			var subdivisions = 40;
+			var subdivisions = 60;
 			var geometry = new THREE.SphereGeometry(radius, subdivisions, subdivisions / 2);
 			geometry.__dirtyVertices = true;
 			geometry.dynamic = true;
 
-			console.log(geometry.faces[0]);
+			/*
 			geometry.faces.splice(0, Math.pow(subdivisions / 2, 2));
 
 			var circleGeometry = new THREE.CircleGeometry(radius, subdivisions);
 			circleGeometry.applyMatrix(new THREE.Matrix4().makeRotationX(Math.PI / 2));
 			THREE.GeometryUtils.merge(geometry, circleGeometry);
+			*/
 
 			// color the vertices
 			var faceIndices = ['a', 'b', 'c', 'd'];
@@ -53,26 +54,18 @@ body {
 				var face = geometry.faces[i];
 				var vertices = (face instanceof THREE.Face3)? 3: 4;
 
-				console.log(geometry.vertices);
 				for(var v = 0; v < vertices; v++) {
 					var vertexIndex = face[faceIndices[v]];
 					var vertex = geometry.vertices[vertexIndex];
 
-					var vertexAngle = Math.atan2(vertex.y, vertex.x);
-					var distanceFromCenter = Math.sqrt(Math.pow(vertex.x, 2) + Math.pow(vertex.y, 2));
+					var vertexAngle = Math.atan2(vertex.x, vertex.z);
+					var distanceFromCenter = Math.sqrt(Math.pow(vertex.x, 2) + Math.pow(vertex.z, 2));
 
 					var color = new THREE.Color(0xfff000);
 					var H = (vertexAngle / Math.PI + 1) / 2;
 					var S = distanceFromCenter / radius;
-					var L = vertex.z / radius;
+					var L = vertex.y / (radius * 2) + .5;
 
-					/* color.setHSL(
-						Math.random(),
-						Math.random(),
-						Math.random()
-					);*/
-
-					//console.log(vertex.x, vertex.y, vertex.z, H, S, L);
 					color.setHSL(H, S, L);
 
 					face.vertexColors[v] = color;
@@ -85,16 +78,16 @@ body {
 					shading: THREE.SmoothShading,
 					vertexColors: THREE.VertexColors,
 					side: THREE.DoubleSide
-				})
+				}),
 				/*
 				new THREE.MeshBasicMaterial({
-					color: 0x000000,
+					color: 0xffff00,
 					wireframe: true,
 					transparent: true,
-					opacity: .2,
+					opacity: .5,
 					side: THREE.DoubleSide
 				})
-				*/
+			   */
 			];
 
 			mesh = new THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
@@ -102,8 +95,8 @@ body {
 
 			var light = new THREE.DirectionalLight(0xffffff);
 			light.position.set(0, 0, 400);
-			scene.add(light);
-			scene.add(new THREE.AmbientLight(0x111111));
+			//scene.add(light);
+			scene.add(new THREE.AmbientLight(0xffffff));
 
 			renderer = new THREE.WebGLRenderer();
 			renderer.setSize(window.innerWidth, window.innerHeight);
