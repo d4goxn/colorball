@@ -3,13 +3,21 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Colorsphere</title>
+	<style type="text/css">
+#stats-widget {
+	position: absolute;
+	top: 5px;
+}
+	</style>
 </head>
 <body>
 	<script type="text/javascript" src="three.js/build/three.min.js"></script>
+	<script type="text/javascript" src="libs/stats.min.js"></script>
 	<script>
 
 		var camera, scene, renderer;
 		var geometry, material, mesh;
+		var stats;
 
 		init();
 		animate();
@@ -21,16 +29,37 @@
 
 			scene = new THREE.Scene();
 
-			geometry = new THREE.IcosahedronGeometry( 200, 3 );
-			material = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true } );
+			geometry = new THREE.SphereGeometry( 200, 20, 10 );
+			geometry.__dirtyVertices = true;
+			geometry.dynamic = true;
 
-			mesh = new THREE.Mesh( geometry, material );
+			console.log(geometry.faces[0]);
+			geometry.faces.splice(0, 40);
+
+			materials = [
+				new THREE.MeshBasicMaterial({
+					color: 0x00bbbb,
+					side: THREE.DoubleSide
+				}),
+				new THREE.MeshBasicMaterial({
+					color: 0xff0000,
+					wireframe: true,
+					side: THREE.DoubleSide
+				})
+			]
+
+			mesh = new THREE.SceneUtils.createMultiMaterialObject( geometry, materials );
 			scene.add( mesh );
+
+			scene.add(new THREE.AmbientLight(0xffffff));
 
 			renderer = new THREE.CanvasRenderer();
 			renderer.setSize( window.innerWidth, window.innerHeight );
 
 			document.body.appendChild( renderer.domElement );
+			stats = new Stats();
+			stats.domElement.id = 'stats-widget';
+			document.body.appendChild(stats.domElement);
 
 		}
 
@@ -43,6 +72,7 @@
 			mesh.rotation.y += 0.02;
 
 			renderer.render( scene, camera );
+			stats.update();
 
 		}
 	</script>
