@@ -4,9 +4,13 @@
 	<meta charset="UTF-8">
 	<title>Colorsphere</title>
 	<style type="text/css">
+body {
+	margin: 0;
+}
+
 #stats-widget {
 	position: absolute;
-	top: 5px;
+	top: 0px;
 }
 	</style>
 </head>
@@ -14,9 +18,10 @@
 	<script type="text/javascript" src="three.js/build/three.min.js"></script>
 	<script type="text/javascript" src="libs/stats.min.js"></script>
 	<script>
+"use strict";
 
 		var camera, scene, renderer;
-		var geometry, material, mesh;
+		var mesh;
 		var stats;
 
 		init();
@@ -24,50 +29,86 @@
 
 		function init() {
 
-			camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 10000 );
+			camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
 			camera.position.z = 1000;
 
 			scene = new THREE.Scene();
 
-			geometry = new THREE.SphereGeometry( 200, 20, 10 );
+			var radius = 300;
+			var subdivisions = 40;
+			var geometry = new THREE.SphereGeometry(radius, subdivisions, subdivisions / 2);
 			geometry.__dirtyVertices = true;
 			geometry.dynamic = true;
 
 			console.log(geometry.faces[0]);
-			geometry.faces.splice(0, 100);
+			geometry.faces.splice(0, Math.pow(subdivisions / 2, 2));
 
-			materials = [
-				new THREE.MeshBasicMaterial({
-					color: 0x00bbbb,
-					side: THREE.DoubleSide
-				}),
-				new THREE.MeshBasicMaterial({
-					color: 0xff0000,
-					wireframe: true,
+			var circleGeometry = new THREE.CircleGeometry(radius, subdivisions);
+			circleGeometry.applyMatrix(new THREE.Matrix4().makeRotationX(Math.PI / 2));
+			THREE.GeometryUtils.merge(geometry, circleGeometry);
+
+			// color the vertices
+			var faceIndices = ['a', 'b', 'c', 'd'];
+			for(var i = 0; i < geometry.faces.length; i++) {
+				var face = geometry.faces[i];
+				var vertices = (face instanceof THREE.Face3)? 3: 4;
+
+				console.log(geometry.vertices);
+				for(var v = 0; v < vertices; v++) {
+					var vertexIndex = face[faceIndices[v]];
+					var vertex = geometry.vertices[vertexIndex];
+
+					var vertexAngle = Math.atan2(vertex.y, vertex.x);
+					var distanceFromCenter = Math.sqrt(Math.pow(vertex.x, 2) + Math.pow(vertex.y, 2));
+
+					var color = new THREE.Color(0xfff000);
+					var H = (vertexAngle / Math.PI + 1) / 2;
+					var S = distanceFromCenter / radius;
+					var L = vertex.z / radius;
+
+					/* color.setHSL(
+						Math.random(),
+						Math.random(),
+						Math.random()
+					);*/
+
+					//console.log(vertex.x, vertex.y, vertex.z, H, S, L);
+					color.setHSL(H, S, L);
+
+					face.vertexColors[v] = color;
+				}
+			}
+
+			var materials = [
+				new THREE.MeshLambertMaterial({
+					color: 0xffffff,
+					shading: THREE.SmoothShading,
+					vertexColors: THREE.VertexColors,
 					side: THREE.DoubleSide
 				})
+				/*
+				new THREE.MeshBasicMaterial({
+					color: 0x000000,
+					wireframe: true,
+					transparent: true,
+					opacity: .2,
+					side: THREE.DoubleSide
+				})
+				*/
 			];
 
-			mesh = new THREE.SceneUtils.createMultiMaterialObject( geometry, materials );
+			mesh = new THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
+			scene.add(mesh);
 
-			// Add a color wheel
-			var circleMesh = new THREE.Mesh(
-				new THREE.CircleGeometry(200, 20),
-				new THREE.MeshBasicMaterial({
-					color: 0xff7700,
-					side: THREE.DoubleSide
-				})
-			);
-			scene.add(circleMesh);
+			var light = new THREE.DirectionalLight(0xffffff);
+			light.position.set(0, 0, 400);
+			scene.add(light);
+			scene.add(new THREE.AmbientLight(0x111111));
 
-			scene.add( mesh );
+			renderer = new THREE.WebGLRenderer();
+			renderer.setSize(window.innerWidth, window.innerHeight);
 
-			scene.add(new THREE.AmbientLight(0xffffff));
-
-			renderer = new THREE.CanvasRenderer();
-			renderer.setSize( window.innerWidth, window.innerHeight );
-
-			document.body.appendChild( renderer.domElement );
+			document.body.appendChild(renderer.domElement);
 			stats = new Stats();
 			stats.domElement.id = 'stats-widget';
 			document.body.appendChild(stats.domElement);
@@ -77,12 +118,12 @@
 		function animate() {
 
 			// note: three.js includes requestAnimationFrame shim
-			requestAnimationFrame( animate );
+			requestAnimationFrame(animate);
 
 			mesh.rotation.x += 0.01;
 			mesh.rotation.y += 0.02;
 
-			renderer.render( scene, camera );
+			renderer.render(scene, camera);
 			stats.update();
 
 		}
