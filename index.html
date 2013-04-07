@@ -34,7 +34,7 @@
 			geometry.dynamic = true;
 
 			console.log(geometry.faces[0]);
-			geometry.faces.splice(0, 40);
+			geometry.faces.splice(0, 100);
 
 			materials = [
 				new THREE.MeshBasicMaterial({
@@ -46,9 +46,20 @@
 					wireframe: true,
 					side: THREE.DoubleSide
 				})
-			]
+			];
 
 			mesh = new THREE.SceneUtils.createMultiMaterialObject( geometry, materials );
+
+			// Add a color wheel
+			var circleMesh = new THREE.Mesh(
+				new THREE.CircleGeometry(200, 20),
+				new THREE.MeshBasicMaterial({
+					color: 0xff7700,
+					side: THREE.DoubleSide
+				})
+			);
+			scene.add(circleMesh);
+
 			scene.add( mesh );
 
 			scene.add(new THREE.AmbientLight(0xffffff));
