@@ -58,13 +58,14 @@ body {
 					var vertexIndex = face[faceIndices[v]];
 					var vertex = geometry.vertices[vertexIndex];
 
-					var vertexAngle = Math.atan2(vertex.x, vertex.z);
+					var horizontalAngle = Math.atan2(vertex.x, vertex.z);
+					var latitude = Math.acos(vertex.y / radius);
 					var distanceFromCenter = Math.sqrt(Math.pow(vertex.x, 2) + Math.pow(vertex.z, 2));
 
 					var color = new THREE.Color(0xfff000);
-					var H = (vertexAngle / Math.PI + 1) / 2;
+					var H = (horizontalAngle / Math.PI + 1) / 2;
 					var S = distanceFromCenter / radius;
-					var L = vertex.y / (radius * 2) + .5;
+					var L = latitude / Math.PI;
 
 					color.setHSL(H, S, L);
 
@@ -113,8 +114,8 @@ body {
 			// note: three.js includes requestAnimationFrame shim
 			requestAnimationFrame(animate);
 
-			mesh.rotation.x += 0.01;
-			mesh.rotation.y += 0.02;
+			mesh.rotation.x += 0.005;
+			mesh.rotation.y += 0.01;
 
 			renderer.render(scene, camera);
 			stats.update();
