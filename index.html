@@ -35,8 +35,9 @@ body {
 			scene = new THREE.Scene();
 
 			var radius = 300;
-			var subdivisions = 60;
-			var geometry = new THREE.SphereGeometry(radius, subdivisions, subdivisions / 2);
+			var subdivisions = 100;
+			//var geometry = new THREE.SphereGeometry(radius, subdivisions, subdivisions / 2);
+			var geometry = new THREE.IcosahedronGeometry(radius, 3);
 			geometry.__dirtyVertices = true;
 			geometry.dynamic = true;
 
@@ -58,14 +59,14 @@ body {
 					var vertexIndex = face[faceIndices[v]];
 					var vertex = geometry.vertices[vertexIndex];
 
-					var horizontalAngle = Math.atan2(vertex.x, vertex.z);
+					var longitude = Math.atan2(vertex.x, vertex.z);
 					var latitude = Math.acos(vertex.y / radius);
 					var distanceFromCenter = Math.sqrt(Math.pow(vertex.x, 2) + Math.pow(vertex.z, 2));
 
 					var color = new THREE.Color(0xfff000);
-					var H = (horizontalAngle / Math.PI + 1) / 2;
+					var H = (longitude / Math.PI + 1) / 2;
 					var S = distanceFromCenter / radius;
-					var L = latitude / Math.PI;
+					var L = latitude / Math.PI * -1 + 1;
 
 					color.setHSL(H, S, L);
 
@@ -75,31 +76,25 @@ body {
 
 			var materials = [
 				new THREE.MeshLambertMaterial({
-					color: 0xffffff,
 					shading: THREE.SmoothShading,
-					vertexColors: THREE.VertexColors,
-					side: THREE.DoubleSide
+					vertexColors: THREE.VertexColors
 				}),
-				/*
 				new THREE.MeshBasicMaterial({
-					color: 0xffff00,
+					color: 0,
 					wireframe: true,
 					transparent: true,
-					opacity: .5,
-					side: THREE.DoubleSide
+					opacity: .1
 				})
-			   */
 			];
 
 			mesh = new THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
 			scene.add(mesh);
 
-			var light = new THREE.DirectionalLight(0xffffff);
-			light.position.set(0, 0, 400);
-			//scene.add(light);
 			scene.add(new THREE.AmbientLight(0xffffff));
 
-			renderer = new THREE.WebGLRenderer();
+			renderer = new THREE.WebGLRenderer({
+				antialias: true
+			});
 			renderer.setSize(window.innerWidth, window.innerHeight);
 
 			document.body.appendChild(renderer.domElement);
