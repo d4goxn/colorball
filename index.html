@@ -18,38 +18,14 @@ body {
 	<script type="text/javascript" src="three.js/build/three.min.js"></script>
 	<script type="text/javascript" src="libs/stats.min.js"></script>
 	<script>
-"use strict";
+		"use strict";
 
-		var camera, scene, renderer;
-		var mesh;
-		var stats;
-
-		init();
-		animate();
-
-		function init() {
-
-			camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
-			camera.position.z = 1000;
-
-			scene = new THREE.Scene();
-
-			var radius = 300;
-			var subdivisions = 100;
-			//var geometry = new THREE.SphereGeometry(radius, subdivisions, subdivisions / 2);
-			var geometry = new THREE.IcosahedronGeometry(radius, 3);
-			geometry.__dirtyVertices = true;
-			geometry.dynamic = true;
-
+		function colorVerticesBySphericalCoordinates(geometry, radius) {
 			/*
-			geometry.faces.splice(0, Math.pow(subdivisions / 2, 2));
-
-			var circleGeometry = new THREE.CircleGeometry(radius, subdivisions);
-			circleGeometry.applyMatrix(new THREE.Matrix4().makeRotationX(Math.PI / 2));
-			THREE.GeometryUtils.merge(geometry, circleGeometry);
+			Hue = latitude
+			Saturation = distance from polar axis
+			Luminance = longitude
 			*/
-
-			// color the vertices
 			var faceIndices = ['a', 'b', 'c', 'd'];
 			for(var i = 0; i < geometry.faces.length; i++) {
 				var face = geometry.faces[i];
@@ -73,49 +49,72 @@ body {
 					face.vertexColors[v] = color;
 				}
 			}
-
-			var materials = [
-				new THREE.MeshLambertMaterial({
-					shading: THREE.SmoothShading,
-					vertexColors: THREE.VertexColors
-				}),
-				new THREE.MeshBasicMaterial({
-					color: 0,
-					wireframe: true,
-					transparent: true,
-					opacity: .1
-				})
-			];
-
-			mesh = new THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
-			scene.add(mesh);
-
-			scene.add(new THREE.AmbientLight(0xffffff));
-
-			renderer = new THREE.WebGLRenderer({
-				antialias: true
-			});
-			renderer.setSize(window.innerWidth, window.innerHeight);
-
-			document.body.appendChild(renderer.domElement);
-			stats = new Stats();
-			stats.domElement.id = 'stats-widget';
-			document.body.appendChild(stats.domElement);
-
 		}
 
-		function animate() {
+		(function() {
+			var camera, scene, renderer;
+			var mesh;
+			var stats;
 
-			// note: three.js includes requestAnimationFrame shim
-			requestAnimationFrame(animate);
+			function init() {
 
-			mesh.rotation.x += 0.005;
-			mesh.rotation.y += 0.01;
+				camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
+				camera.position.z = 1000;
 
-			renderer.render(scene, camera);
-			stats.update();
+				scene = new THREE.Scene();
 
-		}
+				var radius = 300;
+				var subdivisions = 100;
+
+				var geometry = new THREE.IcosahedronGeometry(radius, 3);
+				colorVerticesBySphericalCoordinates(geometry, radius);
+
+				var materials = [
+					new THREE.MeshLambertMaterial({
+						shading: THREE.SmoothShading,
+						vertexColors: THREE.VertexColors
+					}),
+					new THREE.MeshBasicMaterial({
+						color: 0,
+						wireframe: true,
+						transparent: true,
+						opacity: .1
+					})
+				];
+
+				mesh = new THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
+				scene.add(mesh);
+
+				scene.add(new THREE.AmbientLight(0xffffff));
+
+				renderer = new THREE.WebGLRenderer({
+					antialias: true
+				});
+				renderer.setSize(window.innerWidth, window.innerHeight);
+
+				document.body.appendChild(renderer.domElement);
+				stats = new Stats();
+				stats.domElement.id = 'stats-widget';
+				document.body.appendChild(stats.domElement);
+
+			}
+
+			function animate() {
+
+				// note: three.js includes requestAnimationFrame shim
+				requestAnimationFrame(animate);
+
+				mesh.rotation.x += 0.005;
+				mesh.rotation.y += 0.01;
+
+				renderer.render(scene, camera);
+				stats.update();
+
+			}
+
+			init();
+			animate();
+		})();
 	</script>
 </body>
 </html>
