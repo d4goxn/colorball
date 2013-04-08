@@ -20,13 +20,14 @@ body {
 	<script>
 		"use strict";
 
+		var faceIndices = ['a', 'b', 'c', 'd'];
+
 		function colorVerticesBySphericalCoordinates(geometry, radius) {
 			/*
 			Hue = latitude
-			Saturation = distance from polar axis
+			Saturation = distance from polar axis, proportional to radius
 			Luminance = longitude
 			*/
-			var faceIndices = ['a', 'b', 'c', 'd'];
 			for(var i = 0; i < geometry.faces.length; i++) {
 				var face = geometry.faces[i];
 				var vertices = (face instanceof THREE.Face3)? 3: 4;
@@ -51,6 +52,66 @@ body {
 			}
 		}
 
+		function isVertexAbovePlane(vertex, plane) {
+			var v = new THREE.Vector3(0, 0, 0);
+			vertex = v.copy(vertex); // Because sub() and copy() both modify the object in place.
+			var planeToVertex = vertex.sub(plane.center).normalize();
+			var angle = plane.normal.dot(planeToVertex);
+
+			if(angle / Math.PI > 0) return true;
+			else return false;
+		}
+
+		function bisectAlongPlane(geometry, plane) {
+			/*
+			geometry: A THREE.Geometry that will be cut.
+			plane: {
+				center: THREE.Vector3
+				normal: THREE.Vector3
+			}
+			The coordinates of the plane must be in the same space as geometry.vertices.
+			*/
+
+			var upperVertices = []; // I wish this was a set.
+
+			for(var i = 0; i < geometry.vertices.length; i++) {
+				var vertex = geometry.vertices[i];
+				if(isVertexAbovePlane(vertex, plane))
+					upperVertices.push(vertex);
+			}
+
+			var remainingFaces = [];
+			var intersectingEdges = [];
+			for(var i = 0; i < geometry.faces.length; i++) {
+				var face = geometry.faces[i];
+				var verticesPerFace = (face instanceof THREE.Face3)? 3: 4;
+				var isFaceAbovePlane = true;
+
+				// Two birds with one stone: Find faces to remove and find edges that intersect the plane.
+				var lastVertex;
+				var isLastVertexAbovePlane;
+				for(var j = 0; j < verticesPerFace; j++) {
+					var vertex = geometry.vertices[face[faceIndices[j]]];
+					if(isVertexAbovePlane(vertex, plane)) {
+						isLastVertexAbovePlane = true;
+					} else {
+						if(isLastVertexAbovePlane && lastVertex)
+							intersectingEdges.push([lastVertex, vertex]);
+						isLastVertexAbovePlane = false;
+						isFaceAbovePlane = false;
+					}
+					lastVertex = vertex;
+				}
+
+				if(isFaceAbovePlane)
+					remainingFaces.push(face);
+			}
+			geometry.faces = remainingFaces;
+
+			geometry.dynamic = true;
+			geometry.verticesNeedUpdate = true;
+		}
+
 		(function() {
 			var camera, scene, renderer;
 			var mesh;
@@ -66,8 +127,12 @@ body {
 				var radius = 300;
 				var subdivisions = 100;
 
-				var geometry = new THREE.IcosahedronGeometry(radius, 3);
+				var geometry = new THREE.IcosahedronGeometry(radius, 1);
 				colorVerticesBySphericalCoordinates(geometry, radius);
+				bisectAlongPlane(geometry, {
+					center: new THREE.Vector3(0, 0, 0),
+					normal: new THREE.Vector3(0, 1, 0).normalize()
+				});
 
 				var materials = [
 					new THREE.MeshLambertMaterial({
