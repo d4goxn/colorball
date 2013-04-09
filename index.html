@@ -60,7 +60,7 @@ body {
 			var planeToVertex = vertex.sub(plane.center).normalize();
 			var angle = plane.normal.dot(planeToVertex);
 
-			if(angle / Math.PI > 0) return true;
+			if(angle / Math.PI >= 0) return true;
 			else return false;
 		}
 
@@ -97,7 +97,7 @@ body {
 					if(isVertexAbovePlane(vertex, plane)) {
 						isLastVertexAbovePlane = true;
 					} else {
-						if(isLastVertexAbovePlane && lastVertex)
+						if(isLastVertexAbovePlane)
 							intersectingEdges.push([lastVertex, vertex]);
 						isLastVertexAbovePlane = false;
 						isFaceAbovePlane = false;
@@ -109,6 +109,18 @@ body {
 					remainingFaces.push(face);
 			}
 			geometry.faces = remainingFaces;
+
+			// Move points that are on the wrong side of the plane to the intersection of the sphere and the plane, moving through a plane described by a point, the vertex, and by a line, the normal of the intersecting plane.
+			intersectingEdges.forEach(function(edge) {
+				var stationaryPoint, moveablePoint;
+				if(isVertexAbovePlane(edge[0], plane)) {
+					moveablePoint = edge[0];
+					stationaryPoint = edge[1];
+				} else {
+					moveablePoint = edge[1];
+					stationaryPoint = edge[0];
+				}
+			});
 
 			geometry.dynamic = true;
 			geometry.verticesNeedUpdate = true;
