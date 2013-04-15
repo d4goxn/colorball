@@ -54,10 +54,6 @@ body {
 			}
 		}
 
-		function isVertexAbovePlane(vertex, plane) {
-			return plane.distanceToPoint(vertex) >= 0;
-		}
-
 		function bisectAlongPlane(geometry, plane) {
 			/*
 			geometry: A THREE.Geometry that will be cut.
@@ -72,7 +68,7 @@ body {
 
 			for(var i = 0; i < geometry.vertices.length; i++) {
 				var vertex = geometry.vertices[i];
-				if(isVertexAbovePlane(vertex, plane))
+				if(plane.distanceToPoint(vertex) >= 0)
 					upperVertices.push(vertex);
 			}
 
@@ -88,7 +84,7 @@ body {
 				var isLastVertexAbovePlane;
 				for(var j = 0; j < verticesPerFace; j++) {
 					var vertex = geometry.vertices[face[faceIndices[j]]];
-					if(isVertexAbovePlane(vertex, plane)) {
+					if(plane.distanceToPoint(vertex) >= 0) {
 						isLastVertexAbovePlane = true;
 					} else {
 						if(isLastVertexAbovePlane)
@@ -97,7 +93,7 @@ body {
 						isFaceAbovePlane = false;
 					}
 					lastVertex = vertex;
-				}
+				} 
 
 				if(!isFaceAbovePlane)
 					remainingFaces.push(face);
@@ -105,10 +101,9 @@ body {
 			geometry.faces = remainingFaces;
 
 			// Move points that are on the wrong side of the plane to the intersection of the sphere and the plane, moving through a plane described by a point, the vertex, and by a line, oriented along the normal of the intersecting plane, that runs through the center of the sphere. Remember cross product. 
-			var circumferenceVertices = [];
 			intersectingEdges.forEach(function(edge) {
 				var stationaryPoint, moveablePoint;
-				if(isVertexAbovePlane(edge[0], plane)) {
+				if(plane.distanceToPoint(edge[0]) >= 0) {
 					moveablePoint = edge[0];
 					stationaryPoint = edge[1];
 				} else {
@@ -116,7 +111,7 @@ body {
 					stationaryPoint = edge[0];
 				}
 
-				circumferenceVertices.push(moveablePoint);
+				//moveVertexToPlane(moveablePoint, plane, sphereMesh); // sphereMesh is not in scope
 			});
 
 			geometry.dynamic = true;
