@@ -111,7 +111,11 @@ body {
 					stationaryPoint = edge[0];
 				}
 
-				//moveVertexToPlane(moveablePoint, plane, sphereMesh);
+				//moveVertexToPlane(moveablePoint, plane, sphere);
+				// create a translation plane from the center of the sphere and the edge
+				// find the intersection line between the translation plane and the bisecting plane
+				// find the intersection point between the intersection line and the sphere
+				// move the moveable point to the intersection point
 			});
 
 			geometry.dynamic = true;
