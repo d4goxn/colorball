@@ -111,7 +111,7 @@ body {
 					stationaryPoint = edge[0];
 				}
 
-				//moveVertexToPlane(moveablePoint, plane, sphereMesh); // sphereMesh is not in scope
+				//moveVertexToPlane(moveablePoint, plane, sphereMesh);
 			});
 
 			geometry.dynamic = true;
@@ -167,11 +167,11 @@ body {
 
 				initReferenceGrid();
 
-				var radius = 300;
+				var sphere = new THREE.Sphere(new THREE.Vector3(0, 0, 0), 300);
 				var subdivisions = 100;
 
-				var geometry = new THREE.IcosahedronGeometry(radius, 1);
-				colorVerticesBySphericalCoordinates(geometry, radius);
+				var geometry = new THREE.IcosahedronGeometry(sphere.radius, 1);
+				colorVerticesBySphericalCoordinates(geometry, sphere.radius);
 				bisectAlongPlane(geometry, plane);
 
 				var materials = [
