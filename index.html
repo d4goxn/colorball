@@ -174,14 +174,16 @@ body {
 				}));
 				scene.add(planeMesh);
 
-				transformPlane(new THREE.Matrix4().rotateX(Math.PI / 4), plane, planeGeometry);
+				//transformPlane(new THREE.Matrix4().rotateX(Math.PI / 2), plane, planeGeometry);
+				var transform = new THREE.Matrix4().translate(new THREE.Vector3(0, 0, 200));
+				transformPlane(transform, plane, planeGeometry);
 
 				initReferenceGrid();
 
 				var sphere = new THREE.Sphere(new THREE.Vector3(0, 0, 0), 300);
-				var subdivisions = 100;
+				var subdivisions = 3;
 
-				var geometry = new THREE.IcosahedronGeometry(sphere.radius, 1);
+				var geometry = new THREE.IcosahedronGeometry(sphere.radius, subdivisions);
 				colorVerticesBySphericalCoordinates(geometry, sphere.radius);
 				bisectAlongPlane(geometry, plane, sphere);
 
