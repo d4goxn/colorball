@@ -54,7 +54,7 @@ body {
 			}
 		}
 
-		function bisectAlongPlane(geometry, plane) {
+		function bisectAlongPlane(geometry, plane, sphere) {
 			/*
 			geometry: A THREE.Geometry that will be cut.
 			plane: {
@@ -113,8 +113,14 @@ body {
 
 				//moveVertexToPlane(moveablePoint, plane, sphere);
 				// create a translation plane from the center of the sphere and the edge
+				var translationPlane = new THREE.Plane();
+				translationPlane.setFromCoplanarPoints(sphere.center, moveablePoint, stationaryPoint);
+
 				// find the intersection line between the translation plane and the bisecting plane
-				// find the intersection point between the intersection line and the sphere
+				var intersectionNormal = translationPlane.normal.cross(plane.normal);
+
+				// find the intersection point between the intersection line and the sphere:
+					// The intersection point is a vector from the origin. Normalize it and then multiply it by the radius of the sphere to get a point on the surface of the sphere.
 				// move the moveable point to the intersection point
 			});
 
@@ -176,7 +182,7 @@ body {
 
 				var geometry = new THREE.IcosahedronGeometry(sphere.radius, 1);
 				colorVerticesBySphericalCoordinates(geometry, sphere.radius);
-				bisectAlongPlane(geometry, plane);
+				bisectAlongPlane(geometry, plane, sphere);
 
 				var materials = [
 					new THREE.MeshLambertMaterial({
