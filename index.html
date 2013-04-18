@@ -31,6 +31,9 @@ body {
 			Saturation = distance from polar axis, proportional to radius
 			Luminance = longitude
 			*/
+			var invPI = 1 / Math.PI;
+			var invRadius = 1 / radius;
+
 			for(var i = 0; i < geometry.faces.length; i++) {
 				var face = geometry.faces[i];
 				var vertices = (face instanceof THREE.Face3)? 3: 4;
@@ -40,13 +43,13 @@ body {
 					var vertex = geometry.vertices[vertexIndex];
 
 					var longitude = Math.atan2(vertex.x, vertex.z);
-					var latitude = Math.acos(vertex.y / radius);
+					var latitude = Math.acos(vertex.y * invRadius);
 					var distanceFromCenter = Math.sqrt(Math.pow(vertex.x, 2) + Math.pow(vertex.z, 2));
 
 					var color = new THREE.Color(0xfff000);
-					var H = (longitude / Math.PI + 1) / 2;
-					var S = distanceFromCenter / radius;
-					var L = latitude / Math.PI * -1 + 1;
+					var H = ((longitude * invPI) + 1) / 2;
+					var S = distanceFromCenter * invRadius;
+					var L = (-1) * (latitude * invPI) + 1;
 
 					color.setHSL(H, S, L);
 
