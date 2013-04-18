@@ -92,20 +92,20 @@ body {
 						isLastVertexAbovePlane = true;
 					} else {
 						if(isLastVertexAbovePlane)
-							intersectingEdges.push([lastVertex, vertex]);
-						isLastVertexAbovePlane = false;
-						isFaceAbovePlane = false;
-					}
-					lastVertex = vertex;
-				} 
+								intersectingEdges.push([lastVertex, vertex]);
+							isLastVertexAbovePlane = false;
+							isFaceAbovePlane = false;
+						}
+						lastVertex = vertex;
+					} 
 
-				if(!isFaceAbovePlane)
-					remainingFaces.push(face);
-			}
-			geometry.faces = remainingFaces;
+					if(!isFaceAbovePlane)
+						remainingFaces.push(face);
+				}
+				geometry.faces = remainingFaces;
 
-			// Move points that are on the wrong side of the plane to the intersection of the sphere and the plane, moving through a plane described by a point, the vertex, and by a line, oriented along the normal of the intersecting plane, that runs through the center of the sphere. Remember cross product. 
-			intersectingEdges.forEach(function(edge) {
+				// Move points that are on the wrong side of the plane to the intersection of the sphere and the plane, moving through a plane described by a point, the vertex, and by a line, oriented along the normal of the intersecting plane, that runs through the center of the sphere. Remember cross product. 
+				intersectingEdges.forEach(function(edge) {
 				var stationaryPoint, moveablePoint;
 				if(plane.distanceToPoint(edge[0]) >= 0) {
 					moveablePoint = edge[0];
@@ -128,8 +128,30 @@ body {
 				// move the moveable point to the intersection point
 			});
 
+			// Create the cap circle vertices
+			var circleVertices = [];
+			circleVertices.push(findCircleCenterVertex()); // The first vert is the center point.
+
+			var vertexCount = intersectingEdges.length;
+			intersectingEdges.forEach(function(edge, i) {
+				var angle = Math.PI * 2 * i / vertexCount - Math.PI;
+				var x = Math.cos(x);
+				var y = Math.sin(x);
+				var vertex = new THREE.Vector3(x, y, 0);
+				circleVertices.push(vertex);
+			});
+
+			// Create the cap circle faces
+			for(var i = 1; i < vertexCount.length; i++) {
+				//circleFaces.push()
+			}
+
 			geometry.dynamic = true;
 			geometry.verticesNeedUpdate = true;
+		}
+
+		findCircleCenterVertex() {
+			return new THREE.Vector3(0, 0, 0);
 		}
 
 		function transformPlane(matrix, plane, planeGeometry) {
