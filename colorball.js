@@ -1,0 +1,98 @@
+"use strict";
+// @author: Dan Ross / http://abstractgoo.rs.af.cm/
+
+function colorVerticesBySphericalCoordinates(geometry, radius) {
+	/*
+	Hue = latitude
+	Saturation = distance from polar axis
+	Luminance = longitude
+	*/
+	var faceIndices = ['a', 'b', 'c', 'd'];
+	for(var i = 0; i < geometry.faces.length; i++) {
+		var face = geometry.faces[i];
+		var vertices = (face instanceof THREE.Face3)? 3: 4;
+
+		for(var v = 0; v < vertices; v++) {
+			var vertexIndex = face[faceIndices[v]];
+			var vertex = geometry.vertices[vertexIndex];
+
+			var longitude = Math.atan2(vertex.x, vertex.z);
+			var latitude = Math.acos(vertex.y / radius);
+			var distanceFromCenter = Math.sqrt(Math.pow(vertex.x, 2) + Math.pow(vertex.z, 2));
+
+			var color = new THREE.Color(0xfff000);
+			var H = (longitude / Math.PI + 1) / 2;
+			var S = distanceFromCenter / radius;
+			var L = latitude / Math.PI * -1 + 1;
+
+			color.setHSL(H, S, L);
+
+			face.vertexColors[v] = color;
+		}
+	}
+}
+
+(function() {
+	var camera, scene, renderer, controls;
+	var mesh;
+	var stats;
+
+	function init() {
+
+		camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
+		camera.position.z = 1000;
+
+		scene = new THREE.Scene();
+
+		var radius = 300;
+		var subdivisions = 100;
+
+		var geometry = new THREE.IcosahedronGeometry(radius, 3);
+		colorVerticesBySphericalCoordinates(geometry, radius);
+
+		var materials = [
+			new THREE.MeshLambertMaterial({
+				shading: THREE.SmoothShading,
+				vertexColors: THREE.VertexColors
+			}),
+			new THREE.MeshBasicMaterial({
+				color: 0,
+				wireframe: true,
+				transparent: true,
+				opacity: .1
+			})
+		];
+
+		mesh = new THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
+		scene.add(mesh);
+
+		scene.add(new THREE.AmbientLight(0xffffff));
+
+		renderer = new THREE.WebGLRenderer({
+			antialias: true
+		});
+		renderer.setSize(window.innerWidth, window.innerHeight);
+
+		controls = new THREE.TrackballControls(camera, renderer.domElement);
+
+		document.body.appendChild(renderer.domElement);
+		stats = new Stats();
+		stats.domElement.id = 'stats-widget';
+		document.body.appendChild(stats.domElement);
+
+	}
+
+	function animate() {
+
+		// note: three.js includes requestAnimationFrame shim
+		requestAnimationFrame(animate);
+
+		controls.update();
+		renderer.render(scene, camera);
+		stats.update();
+
+	}
+
+	init();
+	animate();
+})();
