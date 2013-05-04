@@ -127,15 +127,15 @@
 
 		// Create the cap circle faces
 		var facePlane = new THREE.Plane();
-		var a, b, c;
-		for(var i = 1; i < vertexCount.length - 1; i++) {
+		var a, b, c, newFace;
+		for(i = 1; i < vertexCount.length - 1; i++) {
 			a = circleVertices[0];
 			b = circleVertices[i];
 			c = circleVertices[i + 1];
 
 			facePlane.setFromCoplanarPoints(a, b, c);
-			var face = new THREE.Face3(a, b, c, facePlane.normal);
-			geometry.faces.push(face);
+			newFace = new THREE.Face3(a, b, c, facePlane.normal);
+			geometry.faces.push(newFace);
 		}
 
 		geometry.dynamic = true;
@@ -152,26 +152,28 @@
 	}
 
 	(function() {
-		var camera, scene, renderer, controls;
-		var mesh;
-		var stats;
-
-		function initReferenceGrid() {
-			var referenceMesh = new THREE.Mesh(
-				new THREE.PlaneGeometry(2000, 2000, 10, 10),
-				new THREE.MeshBasicMaterial({
-					color: 0x333333,
-					wireframe: true,
-					transparent: true,
-					opacity: 0.05
-				})
-			);
-
-			scene.add(referenceMesh);
-		}
+		var scene, camera, renderer, controls, stats;
 
 		function init() {
+			initEnvironment();
+			initWorld();
+			initObjects();
+		}
 
+		function initEnvironment() {
+			stats = new Stats();
+
+			renderer = new THREE.WebGLRenderer({
+				antialias: true
+			});
+			renderer.setSize(window.innerWidth, window.innerHeight);
+
+			document.body.appendChild(renderer.domElement);
+			stats.domElement.id = 'stats-widget';
+			document.body.appendChild(stats.domElement);
+		}
+
+		function initWorld() {
 			camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 1, 10000);
 			camera.position.x = 800;
 			camera.position.y = -600;
@@ -180,7 +182,14 @@
 			camera.lookAt(new THREE.Vector3(0, 0, 0));
 
 			scene = new THREE.Scene();
+			scene.add(new THREE.AmbientLight(0xffffff));
 
+			controls = new THREE.TrackballControls(camera, renderer.domElement);
+			controls.noPan = true;
+		}
+
+		function initObjects() {
+			var mesh;
 			var plane = new THREE.Plane(new THREE.Vector3(0, 0, 1), 0);
 			var planeGeometry = new THREE.PlaneGeometry(800, 800, 4, 4);
 			var planeMesh = new THREE.Mesh(planeGeometry, new THREE.MeshBasicMaterial({
@@ -219,36 +228,36 @@
 
 			mesh = new THREE.SceneUtils.createMultiMaterialObject(geometry, materials);
 			scene.add(mesh);
-
-			scene.add(new THREE.AmbientLight(0xffffff));
-
-			renderer = new THREE.WebGLRenderer({
-				antialias: true
-			});
-			renderer.setSize(window.innerWidth, window.innerHeight);
-
-			controls = new THREE.TrackballControls(camera, renderer.domElement);
-			controls.noPan = true;
-
-			document.body.appendChild(renderer.domElement);
-			stats = new Stats();
-			stats.domElement.id = 'stats-widget';
-			document.body.appendChild(stats.domElement);
-
 		}
 
-		function animate() {
+		function startAnimation() {
+			function animate() {
 
-			// note: three.js includes requestAnimationFrame shim
-			requestAnimationFrame(animate);
+				// note: three.js includes requestAnimationFrame shim
+				requestAnimationFrame(animate);
 
-			controls.update();
-			renderer.render(scene, camera);
-			stats.update();
+				controls.update();
+				renderer.render(scene, camera);
+				stats.update();
+			}
+			animate();
+		}
 
+		function initReferenceGrid() {
+			var referenceMesh = new THREE.Mesh(
+				new THREE.PlaneGeometry(2000, 2000, 10, 10),
+				new THREE.MeshBasicMaterial({
+					color: 0x333333,
+					wireframe: true,
+					transparent: true,
+					opacity: 0.05
+				})
+			);
+
+			scene.add(referenceMesh);
 		}
 
 		init();
-		animate();
+		startAnimation();
 	})();
 })();
