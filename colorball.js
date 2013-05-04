@@ -232,9 +232,9 @@
 
 		function startAnimation() {
 			function animate() {
-
-				// note: three.js includes requestAnimationFrame shim
-				requestAnimationFrame(animate);
+				window.setTimeout(function() {
+					requestAnimationFrame(animate);
+				}, 1000 / 60);
 
 				controls.update();
 				renderer.render(scene, camera);
