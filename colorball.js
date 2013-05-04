@@ -228,6 +228,7 @@
 			renderer.setSize(window.innerWidth, window.innerHeight);
 
 			controls = new THREE.TrackballControls(camera, renderer.domElement);
+			controls.noPan = true;
 
 			document.body.appendChild(renderer.domElement);
 			stats = new Stats();
