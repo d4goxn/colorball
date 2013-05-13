@@ -9,3 +9,7 @@ require.config({
 		}
 	}
 });
+
+require(['colorball'], function(colorball) {
+	colorball();
+});

@@ -1,7 +1,7 @@
 /*global THREE:false Stats:false requestAnimationFrame:false document:false window:false*/
 
 // @author: Dan Ross / http://abstractgoo.rs.af.cm/
-(function() {
+define(function() {
 	"use strict";
 
 	var faceIndices = ['a', 'b', 'c', 'd'];
@@ -124,7 +124,7 @@
 		planeGeometry.applyMatrix(matrix);
 	}
 
-	(function() {
+	return function() {
 		var scene, camera, renderer, controls, stats;
 
 		function init() {
@@ -232,5 +232,5 @@
 
 		init();
 		startAnimation();
-	})();
-})();
+	};
+});
