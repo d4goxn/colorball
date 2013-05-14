@@ -23,6 +23,6 @@ require(['three', 'axisHelper'], function(THREE, AxisHelper) {
 });
 */
 
-require(['colorball'], function(colorball) {
-	colorball();
+require(['colorballInterface'], function(colorballInterface) {
+	colorballInterface();
 });
