@@ -6,14 +6,9 @@ define(function(require) {
 	var THREE = require('three');
 
 	var origin = new THREE.Vector3(0, 0, 0),
+		up = new THREE.Vector3(0, 0, 1),
 		position = new THREE.Vector3(),
 		normal = new THREE.Vector3();
-
-	var coplanarPoints = [];
-
-	for(var i = 0; i < 3; i++) {
-		coplanarPoints.push(new THREE.Vector3());
-	}
 
 	function Plane(geometry, material) {
 		THREE.Mesh.call(this, geometry, material);
@@ -23,7 +18,6 @@ define(function(require) {
 		var constant = normal.distanceTo(origin);
 
 		this.plane = new THREE.Plane(normal, constant);
-		this.axisHelper = new THREE.AxisHelper(100);
 	}
 
 	Plane.prototype = Object.create(THREE.Mesh.prototype);
@@ -39,12 +33,28 @@ define(function(require) {
 	};
 
 	Plane.prototype.updatePlane = function() {
-		position.getPositionFromMatrix(this.matrix);
-		this.plane.normal.copy(position).normalize();
-		this.plane.constant = position.distanceTo(origin);
 
-		this.plane.coplanarPoint(this.axisHelper.position);
-		this.axisHelper.lookAt(origin);
+		// Isolate the rotation component of the matrix, see `http://www.arcsynthesis.org/gltut/Illumination/Tut09%20Normal%20Transformation.html`.
+		var rotationMatrix = new THREE.Matrix4();
+		rotationMatrix.getInverse(this.matrix).transpose();
+
+		var rotation = new THREE.Quaternion();
+		rotation.setFromRotationMatrix(rotationMatrix);
+
+		this.plane.normal.copy(up);
+		this.plane.normal.applyQuaternion(rotation);
+
+
+		/*
+		position.getPositionFromMatrix(this.matrix);
+
+		if(position.equals(origin))
+			this.plane.normal.copy(up);
+		else
+			this.plane.normal.copy(position).normalize();
+		*/
+
+		this.plane.constant = position.distanceTo(origin);
 	};
 
 	return Plane;

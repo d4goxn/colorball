@@ -1,4 +1,4 @@
-/*global document:false window:false Stats:false*/
+/*global document:false window:false Stats:false console:false*/
 
 // @author: Dan Ross / http://abstractgoo.rs.af.cm/
 define(function(require) {
@@ -68,14 +68,14 @@ define(function(require) {
 			scene.add(colorball.mesh);
 
 			var dummyPlane = new THREE.Plane(
-				(new THREE.Vector3(1, 1, 1)).normalize(),
-				100
+				(new THREE.Vector3(0, 0, 1)).normalize(),
+				0
 			);
 
 			controls.addEventListener('change', function() {
 				cameraPlane.lookAt(camera.position);
-				//colorball.bisectAlongPlane(cameraPlane.plane);
-				colorball.bisectAlongPlane(dummyPlane);
+				colorball.bisectAlongPlane(cameraPlane.plane);
+				//colorball.bisectAlongPlane(dummyPlane);
 			});
 		}
 
