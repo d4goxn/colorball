@@ -1,8 +1,15 @@
-/*global THREE:false Stats:false requestAnimationFrame:false document:false window:false*/
+/*global document:false window:false Stats:false*/
 
 // @author: Dan Ross / http://abstractgoo.rs.af.cm/
-define(function() {
+define(function(require) {
 	"use strict";
+
+	var THREE = require('three');
+	require('trackballControls');
+	require('axisHelper');
+	require('stats');
+
+	var Plane = require('plane');
 
 	var faceIndices = ['a', 'b', 'c', 'd'];
 
@@ -173,8 +180,35 @@ define(function() {
 			}));
 			scene.add(planeMesh);
 
+			var axisHelper = new THREE.AxisHelper(100);
+			axisHelper.position.x = -300;
+			axisHelper.position.y = -300;
+			scene.add(axisHelper);
+			window.axisHelper = axisHelper;
+
+			var cameraPlane = new Plane(new THREE.PlaneGeometry(800, 800, 4, 4));
+			scene.add(cameraPlane);
+			window.plane = cameraPlane;
+
+			var markers = [];
+			for(var i = 0; i < 2; i++) {
+				markers[i] = new THREE.Mesh(new THREE.IcosahedronGeometry(25, 2));
+				scene.add(markers[i]);
+			}
+
+			controls.addEventListener('change', function() {
+				cameraPlane.lookAt(camera.position);
+				cameraPlane.plane.coplanarPoint(markers[0].position);
+				markers[1].position.copy(cameraPlane.plane.normal).multiplyScalar(cameraPlane.plane.constant);
+			});
+
 			//transformPlane(new THREE.Matrix4().rotateX(Math.PI / 2), plane, planeGeometry);
-			var transform = new THREE.Matrix4().translate(new THREE.Vector3(0, 0, 200));
+			var transform = new THREE.Matrix4();
+			transform.lookAt(
+				new THREE.Vector3(0, 0, 0),
+				camera.position,
+				new THREE.Vector3(0, 0, 1)
+			);
 			transformPlane(transform, plane, planeGeometry);
 
 			initReferenceGrid();
@@ -206,7 +240,7 @@ define(function() {
 		function startAnimation() {
 			function animate() {
 				window.setTimeout(function() {
-					requestAnimationFrame(animate);
+					window.requestAnimationFrame(animate);
 				}, 1000 / 60);
 
 				controls.update();
