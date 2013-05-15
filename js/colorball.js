@@ -9,7 +9,8 @@ define(function(require) {
 	var materials = [
 		new THREE.MeshLambertMaterial({
 			shading: THREE.SmoothShading,
-			vertexColors: THREE.VertexColors
+			vertexColors: THREE.VertexColors,
+			side: THREE.DoubleSide
 		}),
 		new THREE.MeshBasicMaterial({
 			color: 0,
