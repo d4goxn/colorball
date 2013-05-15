@@ -66,25 +66,28 @@ define(function(require) {
 			}
 			geometry.faces = remainingFaces;
 
-			// Slide vertices that are above the plane down to the plane.
-			// Find all unique vertices in the intersecting edges that are above the plane.
-			var edgeVerts = {};
-			for(i = 0; i < intersectingEdges.length; i++) {
-				for(j = 0; i < 2; j++) {
-					vertex = intersectingEdges[i][j];
-					if(vertex && plane.distanceToPoint(vertex) > 0)
-						edgeVerts[vertex] = vertex;
-				}
+			// Return all vertices to their original positions.
+			for(i  = 0; i < geometry.vertices.length; i++) {
+				geometry.vertices[i].copy(originalVertPositions[i]);
 			}
 
-			// Move each vertex to it's new location on the intersection of the sphere and the plane.
-			for(i in edgeVerts) {
-				var rotationAxis = (new THREE.Vector3()).copy(plane.normal).dot(edgeVerts[i]);
-				var y = plane.constant / sphere.radius;
-				var angleFromNorm = Math.asin(y);
-				var q = (new THREE.Quaternion()).fromAxisAngle(rotationAxis, angleFromNorm);
-				var position = (new THREE.Vector3()).copy(plane.normal).applyQuaternion(q);
-				edgeVerts[i].copy(position);
+			// Slide vertices that are above the plane down to the plane.
+			// Find all unique vertices in the intersecting edges that are above the plane.
+			var q = new THREE.Quaternion();
+			var rotationAxis = new THREE.Vector3();
+			var position = new THREE.Vector3();
+			for(i = 0; i < intersectingEdges.length; i++) {
+				for(j = 0; j < intersectingEdges[i].length; j++) {
+					vertex = intersectingEdges[i][j];
+					if(vertex && plane.distanceToPoint(vertex) >= 0) {
+						rotationAxis.copy(plane.normal).dot(vertex);
+						var y = plane.constant / sphere.radius;
+						var angleFromNorm = Math.asin(y);
+						q.setFromAxisAngle(rotationAxis, angleFromNorm);
+						position.copy(plane.normal).applyQuaternion(q);
+						vertex.copy(position);
+					}
+				}
 			}
 
 			geometry.verticesNeedUpdate = true;
@@ -100,6 +103,13 @@ define(function(require) {
 			subdivisions || 1
 		);
 		geometry.dynamic = true;
+
+		var originalVertPositions = [];
+		for(var i = 0; i < geometry.vertices.length; i++) {
+			originalVertPositions.push(
+				(new THREE.Vector3()).copy(geometry.vertices[i])
+			);
+		}
 
 		this.mesh = new THREE.SceneUtils.createMultiMaterialObject(
 			geometry, materials);
