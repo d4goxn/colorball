@@ -67,6 +67,7 @@ define(function(require) {
 			geometry.faces = remainingFaces;
 
 			geometry.verticesNeedUpdate = true;
+			geometry.colorsNeedUpdate = true;
 		};
 
 		this.updateColors = function() {
