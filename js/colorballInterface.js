@@ -69,13 +69,13 @@ define(function(require) {
 
 			var dummyPlane = new THREE.Plane(
 				(new THREE.Vector3(0, 0, 1)).normalize(),
-				0
+				50
 			);
 
 			controls.addEventListener('change', function() {
-				cameraPlane.lookAt(camera.position);
-				colorball.bisectAlongPlane(cameraPlane.plane);
-				//colorball.bisectAlongPlane(dummyPlane);
+				//cameraPlane.lookAt(camera.position);
+				//colorball.bisectAlongPlane(cameraPlane.plane);
+				colorball.bisectAlongPlane(dummyPlane);
 			});
 		}
 

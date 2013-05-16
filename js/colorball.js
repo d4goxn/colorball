@@ -76,16 +76,18 @@ define(function(require) {
 			var q = new THREE.Quaternion();
 			var rotationAxis = new THREE.Vector3();
 			var position = new THREE.Vector3();
+			var y = plane.constant / sphere.radius;
+
 			for(i = 0; i < intersectingEdges.length; i++) {
 				for(j = 0; j < intersectingEdges[i].length; j++) {
 					vertex = intersectingEdges[i][j];
 					if(vertex && plane.distanceToPoint(vertex) >= 0) {
-						rotationAxis.copy(plane.normal).dot(vertex);
-						var y = plane.constant / sphere.radius;
-						var angleFromNorm = Math.asin(y);
-						q.setFromAxisAngle(rotationAxis, angleFromNorm);
+
+						rotationAxis.copy(plane.normal).cross(vertex).normalize();
+						var angleFromNorm = Math.asin(y) + Math.PI / 2;
+						q.setFromAxisAngle(rotationAxis, angleFromNorm).normalize();
 						position.copy(plane.normal).applyQuaternion(q);
-						vertex.copy(position);
+						vertex.copy(position).multiplyScalar(sphere.radius);
 					}
 				}
 			}
