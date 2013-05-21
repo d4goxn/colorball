@@ -73,9 +73,12 @@ define(function(require) {
 			);
 
 			controls.addEventListener('change', function() {
-				//cameraPlane.lookAt(camera.position);
-				//colorball.bisectAlongPlane(cameraPlane.plane);
-				colorball.bisectAlongPlane(dummyPlane);
+				cameraPlane.lookAt(camera.position);
+				scene.remove(colorball.mesh);
+				colorball = new Colorball(sphere, subdivisions);
+				scene.add(colorball.mesh);
+				cameraPlane.lookAt(camera.position);
+				colorball.bisectAlongPlane(cameraPlane.plane);
 			});
 		}
 

@@ -20,7 +20,7 @@ define(function(require) {
 		})
 	];
 
-	return function(sphere, subdivisions) {
+	function Colorball(sphere, subdivisions) {
 
 		this.bisectAlongPlane = function(plane) {
 			/*
@@ -119,6 +119,7 @@ define(function(require) {
 		var originalFaces = geometry.faces;
 
 		this.updateColors();
+	}
 
-	};
+	return Colorball;
 });
