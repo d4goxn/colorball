@@ -54,7 +54,7 @@ define(function(require) {
 			this.plane.normal.copy(position).normalize();
 		*/
 
-		this.plane.constant = position.distanceTo(origin);
+		//this.plane.constant = position.distanceTo(origin);
 	};
 
 	return Plane;

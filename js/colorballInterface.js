@@ -67,19 +67,46 @@ define(function(require) {
 			var colorball = new Colorball(sphere, subdivisions);
 			scene.add(colorball.mesh);
 
-			var dummyPlane = new THREE.Plane(
-				(new THREE.Vector3(0, 0, 1)).normalize(),
-				50
-			);
+			controls.addEventListener('change', update);
 
-			controls.addEventListener('change', function() {
+			var middleButton = 1;
+			var mouseY = 
+			renderer.domElement.addEventListener('mousedown', function(event) {
+				if(event.button === middleButton) {
+					document.addEventListener('mousemove', zoomEvent);
+					document.addEventListener('mouseup', endZoomEvent);
+				}
+			});
+
+			var zoomFactor = 1,
+				zoom = 0,
+				lastScreenY, delta;
+			function zoomEvent(event) {
+				if(lastScreenY === undefined) {
+					lastScreenY = event.screenY;
+				} else {
+					delta = event.screenY - lastScreenY;
+					zoom += delta * zoomFactor;
+					lastScreenY = event.screenY;
+				}
+				update();
+			}
+
+			function endZoomEvent(event) {
+				document.removeEventListener('mousemove', zoomEvent);
+				document.removeEventListener('mouseup', endZoomEvent);
+			}
+			
+			function update() {
 				cameraPlane.lookAt(camera.position);
+				cameraPlane.plane.constant = zoom;
+
 				scene.remove(colorball.mesh);
 				colorball = new Colorball(sphere, subdivisions);
 				scene.add(colorball.mesh);
-				cameraPlane.lookAt(camera.position);
+
 				colorball.bisectAlongPlane(cameraPlane.plane);
-			});
+			}
 		}
 
 		function startAnimation() {
